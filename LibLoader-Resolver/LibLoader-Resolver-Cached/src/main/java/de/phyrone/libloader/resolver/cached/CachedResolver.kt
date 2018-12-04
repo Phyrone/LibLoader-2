@@ -7,6 +7,14 @@ import java.io.*
 import java.nio.file.Files
 
 class CachedResolver(vararg resolvers: LibResolver, private val cacheFolder: File = File(".", "libs/")) : LibResolver {
+    init {
+        if(cacheFolder.exists()){
+            if(cacheFolder.isDirectory)
+                throw IllegalArgumentException("CacheFolder is a File")
+        }else{
+            cacheFolder.mkdirs()
+        }
+    }
     val cacheDataFile = File(cacheFolder.path, "CacheData")
     val resolverList = arrayListOf(*resolvers)
     fun addResolver(resolver: LibResolver) {
@@ -56,6 +64,7 @@ class CachedResolver(vararg resolvers: LibResolver, private val cacheFolder: Fil
     private fun valiadateCached(hashes: Array<String>?): Boolean {
         if (hashes.isNullOrEmpty()) return false
         hashes.forEach { hash ->
+
             val file = hashToCacheFile(hash)
             if (!file.exists() || file.isDirectory || fileToHash(file) != hash) {
                 return false
