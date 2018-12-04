@@ -9,7 +9,7 @@ import java.nio.file.Files
 class CachedResolver(vararg resolvers: LibResolver, private val cacheFolder: File = File(".", "libs/")) : LibResolver {
     init {
         if(cacheFolder.exists()){
-            if(cacheFolder.isDirectory)
+            if(!cacheFolder.isDirectory)
                 throw IllegalArgumentException("CacheFolder is a File")
         }else{
             cacheFolder.mkdirs()
