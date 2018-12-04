@@ -4,17 +4,19 @@ import de.phyrone.libloader.resolver.LibResolver
 import de.phyrone.libloader.resolver.UnresolvedDependencyExeption
 import org.apache.commons.codec.digest.DigestUtils
 import java.io.*
+import java.lang.Exception
 import java.nio.file.Files
 
 class CachedResolver(vararg resolvers: LibResolver, private val cacheFolder: File = File(".", "libs/")) : LibResolver {
     init {
-        if(cacheFolder.exists()){
-            if(!cacheFolder.isDirectory)
+        if (cacheFolder.exists()) {
+            if (!cacheFolder.isDirectory)
                 throw IllegalArgumentException("CacheFolder is a File")
-        }else{
+        } else {
             cacheFolder.mkdirs()
         }
     }
+
     val cacheDataFile = File(cacheFolder.path, "CacheData")
     val resolverList = arrayListOf(*resolvers)
     fun addResolver(resolver: LibResolver) {
@@ -24,18 +26,23 @@ class CachedResolver(vararg resolvers: LibResolver, private val cacheFolder: Fil
     val data = loadCacheData()
 
     override fun resolve(string: String): Array<File>? {
-        fun loadCache(): Array<File> {
-            val ret = ArrayList<File>()
-            data[string]?.forEach { hash ->
-                ret.add(hashToCacheFile(hash))
+        try {
+            fun loadCache(): Array<File> {
+                val ret = ArrayList<File>()
+                data[string]?.forEach { hash ->
+                    ret.add(hashToCacheFile(hash))
+                }
+                return ret.toTypedArray()
             }
-            return ret.toTypedArray()
-        }
-        return if (valiadateCached(data[string])) {
-            loadCache()
-        } else {
-            addToCache(string, resolveOrigin(string))
-            loadCache()
+            return if (valiadateCached(data[string])) {
+                loadCache()
+            } else {
+                addToCache(string, resolveOrigin(string))
+                loadCache()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw UnresolvedDependencyExeption(e.message ?: "")
         }
     }
 
