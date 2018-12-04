@@ -7,13 +7,13 @@ import java.io.*
 import java.nio.file.Files
 
 class CachedResolver(vararg resolvers: LibResolver, private val cacheFolder: File = File(".", "libs/")) : LibResolver {
+    val cacheDataFile = File(cacheFolder.path, "CacheData")
     val resolverList = arrayListOf(*resolvers)
-    val data = loadCacheData()
     fun addResolver(resolver: LibResolver) {
         resolverList.add(resolver)
     }
+    val data = loadCacheData()
 
-    val cacheDataFile = File(cacheFolder.path, "CacheData")
     override fun resolve(string: String): Array<File>? {
         fun loadCache(): Array<File> {
             val ret = ArrayList<File>()
