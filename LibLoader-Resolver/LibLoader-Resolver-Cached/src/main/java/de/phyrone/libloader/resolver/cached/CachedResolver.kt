@@ -12,6 +12,7 @@ class CachedResolver(vararg resolvers: LibResolver, private val cacheFolder: Fil
     fun addResolver(resolver: LibResolver) {
         resolverList.add(resolver)
     }
+
     val data = loadCacheData()
 
     override fun resolve(string: String): Array<File>? {
@@ -22,8 +23,7 @@ class CachedResolver(vararg resolvers: LibResolver, private val cacheFolder: Fil
             }
             return ret.toTypedArray()
         }
-        return if (data.containsKey(string) || valiadateCached(data[string]
-                        ?: throw NullPointerException("this Should be Thrown (Multithreaded?)"))) {
+        return if (valiadateCached(data[string])) {
             loadCache()
         } else {
             addToCache(string, resolveOrigin(string))
@@ -53,7 +53,8 @@ class CachedResolver(vararg resolvers: LibResolver, private val cacheFolder: Fil
         outStream.close()
     }
 
-    private fun valiadateCached(hashes: Array<String>): Boolean {
+    private fun valiadateCached(hashes: Array<String>?): Boolean {
+        if (hashes.isNullOrEmpty()) return false
         hashes.forEach { hash ->
             val file = hashToCacheFile(hash)
             if (!file.exists() || file.isDirectory || fileToHash(file) != hash) {
