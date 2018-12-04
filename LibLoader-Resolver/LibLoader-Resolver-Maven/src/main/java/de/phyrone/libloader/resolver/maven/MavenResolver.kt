@@ -22,8 +22,9 @@ import org.eclipse.aether.resolution.DependencyRequest
 import org.eclipse.aether.util.filter.ScopeDependencyFilter
 import java.lang.Exception
 
+object DefaultMavenResolver : MavenResolver()
 
-class MavenResolver(
+open class MavenResolver(
         val repositroys: List<RemoteRepository> = arrayListOf(
                 RemoteRepository.Builder("central", "default", "https://repo.maven.apache.org/maven2/").build(),
                 RemoteRepository.Builder("jcenter", "default", "https://jcenter.bintray.com/").build(),
@@ -58,7 +59,7 @@ class MavenResolver(
         val dep = Dependency(artifact, "compile", false)
 
         val req = CollectRequest(dep, repositroys)
-        val depReq = DependencyRequest(req, ScopeDependencyFilter("provided"))
+        val depReq = DependencyRequest(req, ScopeDependencyFilter("provided", "test", "import"))
         val result = system.resolveDependencies(mvnSession, depReq)
         return result.artifactResults
 
