@@ -15,7 +15,6 @@
         <module>LibLoader-Resolver-URL</module>
         <module>LibLoader-Resolver-Maven</module>
         <module>LibLoader-Resolver-Common</module>
-        <module>LibLoader-Resolver-Cached</module>
     </modules>
 
 

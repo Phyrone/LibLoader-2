@@ -31,7 +31,7 @@ open class MavenResolver(
                 RemoteRepository.Builder("jitpack.io", "default", "https://jitpack.io/").build()
         )
 ) : LibResolver {
-    var localRepository = LocalRepository(System.getProperty("user.home", "/") + "/.m2/repository/")
+    val localRepository = LocalRepository(System.getProperty("user.home", "/") + "/.m2/repository/")
     val locator = MavenRepositorySystemUtils.newServiceLocator().apply {
         addService(RepositoryConnectorFactory::class.java, BasicRepositoryConnectorFactory::class.java)
         addService(TransporterFactory::class.java, FileTransporterFactory::class.java)
