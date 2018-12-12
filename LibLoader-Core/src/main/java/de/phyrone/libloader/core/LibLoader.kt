@@ -4,8 +4,11 @@ import de.phyrone.libloader.hook.LibHook
 import de.phyrone.libloader.resolver.LibResolver
 import de.phyrone.libloader.resolver.UnresolvedDependencyExeption
 import java.io.File
+import java.util.concurrent.FutureTask
+import java.util.logging.Logger
+import kotlin.system.measureTimeMillis
 
-open class LibLoader(private val hook: LibHook, vararg resolvers: LibResolver = arrayOf()) {
+open class LibLoader(private val hook: LibHook, vararg resolvers: LibResolver = arrayOf(), val logger: Logger? = null) {
     val resolvers = arrayListOf(*resolvers)
 
     /**
@@ -36,21 +39,30 @@ open class LibLoader(private val hook: LibHook, vararg resolvers: LibResolver = 
      * @throws UnresolvedDependencyExeption if no resolver found a Dependency
      */
     fun resolve(dependency: String): Array<File> {
-        for (resolver in resolvers) {
-            try {
-                val ret = resolver.resolve(dependency)
-                if (ret.isNullOrEmpty()) {
-                    throw UnresolvedDependencyExeption("Wrong Result")
-                } else {
-                    return ret
+        logger?.fine("Resolve $dependency...")
+        val task = FutureTask<Array<File>>() {
+            for (resolver in resolvers) {
+                try {
+                    val ret = resolver.resolve(dependency)
+                    if (ret.isNullOrEmpty()) {
+                        throw UnresolvedDependencyExeption("Wrong Result")
+                    } else {
+
+                        return@FutureTask ret
+                    }
+                } catch (e: UnresolvedDependencyExeption) {
+                    if (!e.message.isNullOrBlank())
+                        logger?.warning("($dependency) a Resolver Failed with message \"" + e.message + "\"")
+                    continue
                 }
-            } catch (e: UnresolvedDependencyExeption) {
-                if (!e.message.isNullOrBlank())
-                    println("Error($dependency) " + e.message)
-                continue
             }
+            throw UnresolvedDependencyExeption("No Resolver found a Dependency")
         }
-        throw UnresolvedDependencyExeption("No Resolver found a Dependency")
+        val time = measureTimeMillis {
+            task.run()
+        }
+        logger?.finer("Resolved $dependency (took $time ms)")
+        return task.get()
     }
 
 
