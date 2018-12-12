@@ -17,6 +17,13 @@ val hashFunction: HashFunction = Hashing.sha512()
 object SimpleUrlResolver : UrlResolver(File(System.getProperty("user.home", "/") + "/.LibLoader", "SimpleUrlResolver"))
 
 open class UrlResolver(private val cacheFolder: File) : LibResolver {
+    init {
+        if (!cacheFolder.exists()) {
+            cacheFolder.mkdirs()
+        } else if (cacheFolder.isFile) {
+            throw IllegalArgumentException("CacheFolder is a File!")
+        }
+    }
 
     override fun resolve(string: String): Array<File>? {
         try {

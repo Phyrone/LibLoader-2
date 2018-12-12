@@ -29,9 +29,10 @@ open class MavenResolver(
                 RemoteRepository.Builder("central", "default", "https://repo.maven.apache.org/maven2/").build(),
                 RemoteRepository.Builder("jcenter", "default", "https://jcenter.bintray.com/").build(),
                 RemoteRepository.Builder("jitpack.io", "default", "https://jitpack.io/").build()
-        )
+        ),
+        repositoryDir: String = System.getProperty("user.home", "/") + "/.m2/repository/"
 ) : LibResolver {
-    val localRepository = LocalRepository(System.getProperty("user.home", "/") + "/.m2/repository/")
+    val localRepository = LocalRepository(repositoryDir)
     val locator = MavenRepositorySystemUtils.newServiceLocator().apply {
         addService(RepositoryConnectorFactory::class.java, BasicRepositoryConnectorFactory::class.java)
         addService(TransporterFactory::class.java, FileTransporterFactory::class.java)
@@ -50,7 +51,7 @@ open class MavenResolver(
             }
             return ret.toTypedArray()
         } catch (e: Exception) {
-            throw UnresolvedDependencyExeption()
+            throw UnresolvedDependencyExeption(e.message ?: "")
         }
 
     }
