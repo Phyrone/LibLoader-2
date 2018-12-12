@@ -45,6 +45,8 @@ open class LibLoader(private val hook: LibHook, vararg resolvers: LibResolver = 
                     return ret
                 }
             } catch (e: UnresolvedDependencyExeption) {
+                if (!e.message.isNullOrBlank())
+                    println("Error($dependency) " + e.message)
                 continue
             }
         }

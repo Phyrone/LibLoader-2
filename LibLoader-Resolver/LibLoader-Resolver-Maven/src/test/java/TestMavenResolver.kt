@@ -15,7 +15,8 @@ class TestMavenResolver {
         "com.google.guava:guava:27.0.1-jre",
         "org.apache.commons:commons-lang3:3.8.1",
         "com.uchuhimo:konf:0.12",
-        "io.ktor:ktor-server-netty:1.0.1"
+        "io.ktor:ktor-server-netty:1.0.1",
+        "com.github.Phyrone.LibLoader-2:LibLoader-Resolver-Maven:90a9394275"
     ])
     fun testResolver(dependency: String) {
         val time = measureTimeMillis {
