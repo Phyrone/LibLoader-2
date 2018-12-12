@@ -61,7 +61,7 @@ open class LibLoader(private val hook: LibHook, vararg resolvers: LibResolver = 
         val time = measureTimeMillis {
             task.run()
         }
-        logger?.finer("Resolved $dependency (took $time ms)")
+        logger?.info("Resolved $dependency (took $time ms)")
         return task.get()
     }
 
