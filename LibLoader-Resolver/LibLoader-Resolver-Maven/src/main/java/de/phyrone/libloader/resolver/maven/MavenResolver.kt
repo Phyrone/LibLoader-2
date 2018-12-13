@@ -2,6 +2,8 @@ package de.phyrone.libloader.resolver.maven
 
 import de.phyrone.libloader.resolver.LibResolver
 import de.phyrone.libloader.resolver.UnresolvedDependencyExeption
+import org.apache.commons.cli.DefaultParser
+import org.apache.commons.cli.Options
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils
 import org.eclipse.aether.RepositorySystem
 import org.eclipse.aether.artifact.Artifact
@@ -24,6 +26,13 @@ import java.lang.Exception
 
 object DefaultMavenResolver : MavenResolver()
 
+const val noDependencyResolveOption = "noSubDependency"
+
+enum class MavenResolverArgs(private val flag: String) {
+    NOSUBDEPENDENCYS(noDependencyResolveOption);
+    override fun toString() = "-$flag"
+}
+
 open class MavenResolver(
         val repositroys: List<RemoteRepository> = arrayListOf(
                 RemoteRepository.Builder("central", "default", "https://repo.maven.apache.org/maven2/").build(),
@@ -32,6 +41,10 @@ open class MavenResolver(
         ),
         repositoryDir: String = System.getProperty("user.home", "/") + "/.m2/repository/"
 ) : LibResolver {
+    val cliOptions = Options().also { options ->
+        options.addOption("x", noDependencyResolveOption, false, "No Sub-Dependency's will be Resolved")
+    }
+    val cli = DefaultParser()
     val localRepository = LocalRepository(repositoryDir)
     val locator = MavenRepositorySystemUtils.newServiceLocator().apply {
         addService(RepositoryConnectorFactory::class.java, BasicRepositoryConnectorFactory::class.java)
@@ -43,11 +56,18 @@ open class MavenResolver(
         session.localRepositoryManager = system.newLocalRepositoryManager(session, localRepository)
     }
 
+    /* -x resolve only the artifact jar without dependency's */
     override fun resolve(string: String): Array<File> {
         try {
+            val cmd = cli.parse(cliOptions, string.split(" ").toTypedArray())
             val ret = arrayListOf<File>()
-            resolveArtifactDependencys(DefaultArtifact(string)).forEach {
-                ret.add(resolveArtifactToFile(it.artifact))
+            val artifact = DefaultArtifact(cmd.args[0])
+            if (cmd.hasOption(noDependencyResolveOption)) {
+                ret.add(resolveArtifactToFile(artifact))
+            } else {
+                resolveArtifactDependencys(artifact).forEach {
+                    ret.add(resolveArtifactToFile(it.artifact))
+                }
             }
             return ret.toTypedArray()
         } catch (e: Exception) {

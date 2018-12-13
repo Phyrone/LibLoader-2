@@ -4,6 +4,7 @@ import com.google.common.hash.HashFunction
 import com.google.common.hash.Hashing
 import de.phyrone.libloader.resolver.LibResolver
 import de.phyrone.libloader.resolver.UnresolvedDependencyExeption
+import java.io.BufferedInputStream
 import java.io.File
 import java.io.IOException
 import java.net.MalformedURLException
@@ -32,7 +33,7 @@ open class UrlResolver(private val cacheFolder: File) : LibResolver {
                 val url = URL(string)
                 val connection = url.openConnection()
                 connection.setRequestProperty("User-Agent", "Mozilla/5.0 (X11; Linux i686; rv:64.0) Gecko/20100101 Firefox/64.0")
-                Files.copy(connection.getInputStream(), file.toPath(), StandardCopyOption.REPLACE_EXISTING)
+                Files.copy(BufferedInputStream(connection.getInputStream()), file.toPath(), StandardCopyOption.REPLACE_EXISTING)
             }
             return arrayOf(file)
         } catch (e: IOException) {
