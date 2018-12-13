@@ -26,7 +26,7 @@ open class UrlResolver(private val cacheFolder: File) : LibResolver {
         }
     }
 
-    override fun resolve(string: String): Array<File>? {
+    override fun resolve(string: String): Array<File> {
         try {
             val file = File(cacheFolder.path, hashFunction.hashString(string, StandardCharsets.UTF_8).toString() + ".jar")
             if (!file.exists()) {
