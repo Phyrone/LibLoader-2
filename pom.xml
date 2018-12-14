@@ -12,6 +12,7 @@
         <module>LibLoader-Core</module>
         <module>LibLoader-Resolver</module>
         <module>LibLoader-Injector</module>
+        <module>LibLoader-Util</module>
     </modules>
 
     <properties>
